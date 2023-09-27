@@ -3,9 +3,13 @@
   "description": "Backend server for insert data into some databases",
   "version": "1.0.0",
   "main": "index.js",
+  // "scripts": {
+  //   "start": "node --env-file .env index.js",
+  //   "test": "echo \"Error: no test specified\" && exit 1"
+  // },
   "scripts": {
-    "start": "node --env-file .env index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
