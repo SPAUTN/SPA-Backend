@@ -8,7 +8,7 @@ app.get('*', (req, res) => {
     res.redirect('/');
 })
 
-app.use('/insert/', async (req, res) => {
+app.post('/insert/', async (req, res) => {
   try {
     const { table, user, password, columns, values } = req.body;
     const database = process.env.PG_DB
@@ -37,6 +37,6 @@ app.use('/insert/', async (req, res) => {
 });
 
 
-app.listen(port, () => {
-    console.log(`App listening on port ${port}`);
-})
+// app.listen(port, () => {
+//     console.log(`App listening on port ${port}`);
+// })
