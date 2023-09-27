@@ -2,7 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 
 const app = express();
-const port = 3000; // Change to your desired port
+const port = process.env.PORT ?? 8080; // Change to your desired port
 
 app.use(express.json());
 
