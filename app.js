@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = process.env.PORT ?? 3000;
+const port = process.env.PORT ?? 8080;
 
 app.use(express.static('public'))
 
@@ -37,6 +37,7 @@ app.get('*', (req, res) => {
 // });
 
 
-app.listen(port, () => {
+app.listen(port, async (req, res) => {
     console.log(`App listening on port ${port}`);
+    console.log(req.body);
 })
