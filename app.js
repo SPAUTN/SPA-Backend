@@ -8,7 +8,7 @@ app.get('*', (req, res) => {
     res.redirect('/');
 })
 
-app.post('/insert/', async (req, res) => {
+app.use('/insert/', async (req, res) => {
   try {
     const { table, user, password, columns, values } = req.body;
     const database = process.env.PG_DB
