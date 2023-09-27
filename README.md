@@ -44,4 +44,4 @@ Any issues or feature requests can be raised on the [Issues page](https://github
 
 ## License
 
-This template repository is [MIT licensed](LICENSE).
+This template repository is [MIT licensed](LICENSE)...
