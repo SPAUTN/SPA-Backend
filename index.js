@@ -10,7 +10,10 @@ app.use(express.json());
 app.post('/insert', async (req, res) => {
   try {
     const { table, user, password, columns, values } = req.body;
+    console.debug(`Incoming body: ${req.body}`);
+  
     const database = process.env.PG_DB
+    console.debug(`Trying to insert to: ${database}`);
 
     // Create a new pool with the provided username, password, and database name
     const pool = new Pool({
@@ -29,6 +32,7 @@ app.post('/insert', async (req, res) => {
     await pool.query(query, values);
 
     res.status(201).json({ message: 'Data inserted successfully' });
+    console.debug(`Data inserted succesffuly: ${req.body}`);
   } catch (error) {
     console.error('Error inserting data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
@@ -39,3 +43,7 @@ app.post('/insert', async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
+
+app.get() {
+  console.log("Que haces acá?");
+}
