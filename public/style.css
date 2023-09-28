@@ -1,0 +1,26 @@
+* {
+    background-color: #375902;
+    justify-content: center;
+}
+
+.image-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: linear-gradient(to right, #3acfd5 0%, #3a4ed5 100%) 1;
+    border-radius: 50px;
+}
+
+.intro-image {
+    width: 50%;
+    align-self: center;
+    border: 5px solid transparent;
+
+    border-radius: 50px;
+    /* background: linear-gradient(to right, transparent, transparent 95%, #375902 5%, #375902); */
+}
+
+.intro-image::after {
+    border-radius: inherit;
+}

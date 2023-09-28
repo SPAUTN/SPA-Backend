@@ -4,8 +4,10 @@ const { Pool } = require('pg');
 const app = express();
 const port = process.env.PORT ?? 8080; // Change to your desired port
 const path = require('path');
+const fs = require('fs');
 
 app.use(express.json());
+app.use(express.static("public"));
 
 // Endpoint to receive data and insert into the specified table
 app.post('/insert', async (req, res) => {
@@ -45,6 +47,19 @@ app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
 
+
 app.get('/',(req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.png'))
+  const indexPath = path.join(__dirname, '../public', 'index.html');
+  console.log(indexPath);
+
+  // Read the HTML file and send it as the response
+  fs.readFile(indexPath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Error reading HTML file:', err);
+      res.status(500).json({ error: 'Internal Server Error' });
+      return;
+    }
+
+    res.send(data);
+  });
 });
