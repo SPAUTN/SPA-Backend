@@ -3,6 +3,7 @@ const { Pool } = require('pg');
 
 const app = express();
 const port = process.env.PORT ?? 8080; // Change to your desired port
+const path = require('path');
 
 app.use(express.json());
 
@@ -44,6 +45,6 @@ app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
 
-app.get() {
-  console.log("Que haces acá?");
-}
+app.get('/',(req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.png'))
+});
