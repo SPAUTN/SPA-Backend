@@ -12,8 +12,10 @@ app.use(express.static("public"));
 // Endpoint to receive data and insert into the specified table
 app.post('/insert', async (req, res) => {
   try {
-    const { table, user, password, columns, values } = req.body;
+    const { table, user, password, frame } = req.body;
     console.debug(`Incoming body: ${req.body}`);
+    const columns = Object.keys(frame);
+    const values = Object.values(frame);
   
     const database = process.env.PG_DB
     console.debug(`Trying to insert to: ${database}`);
@@ -35,7 +37,7 @@ app.post('/insert', async (req, res) => {
     await pool.query(query, values);
 
     res.status(201).json({ message: 'Data inserted successfully' });
-    console.debug(`Data inserted succesffuly: ${req.body}`);
+    console.debug(`Data inserted succesffuly: "${Object.values(frame)}" in "${Object.keys(frame)}" from "${table}"`);
   } catch (error) {
     console.error('Error inserting data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
