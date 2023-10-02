@@ -13,7 +13,7 @@ app.use(express.static("public"));
 app.post('/insert', async (req, res) => {
   try {
     const { table, user, password, frame } = req.body;
-    console.debug(`Incoming body: ${req.body}`);
+    console.debug(`Incoming body: ${JSON.stringify(req.body)}`);
     frame.timestamp = new Date().toISOString();
     const columns = Object.keys(frame);
     const values = Object.values(frame);
