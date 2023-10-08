@@ -14,7 +14,6 @@ app.post('/insert', async (req, res) => {
   try {
     console.debug(`Incoming body: ${JSON.stringify(req.body)}`);
     const { table, user, password, frame } = req.body;
-    frame.timestamp = new Date().toISOString();
     const columns = Object.keys(frame);
     const values = Object.values(frame);
   
