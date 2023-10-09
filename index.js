@@ -46,7 +46,7 @@ app.post('/insert', async (req, res) => {
 
 app.post('/log', async (req, res) => {
   try {
-    console.debug(`Incoming body: ${JSON.stringify(req.body)}`);
+    console.debug(`Incoming log: ${JSON.stringify(req.body)}`);
     const { user, password, frame } = req.body;
     const columns = Object.keys(frame);
     const values = Object.values(frame);
