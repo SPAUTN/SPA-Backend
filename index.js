@@ -71,7 +71,7 @@ app.post('/log', async (req, res) => {
     await pool.query(query, values);
 
     res.status(201).json({ message: 'Log inserted successfully' });
-    console.debug(`Log inserted succesffuly: "${Object.values(frame)}" in "${Object.keys(frame)}" from "${table}"`);
+    console.debug("Log inserted succesffuly.");
   } catch (error) {
     console.error('Error inserting log:', error);
     res.status(500).json({ error: 'Internal Server Error' });
