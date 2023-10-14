@@ -37,7 +37,7 @@ app.post('/insert', async (req, res) => {
   try {
     authenticate(req.headers.authorization);
     console.debug(`Incoming body: ${JSON.stringify(req.body)}`);
-    const { table, user, password, frame } = req.body;
+    const { table, user, frame } = req.body;
     const columns = Object.keys(frame);
     const values = Object.values(frame);
   
@@ -49,7 +49,7 @@ app.post('/insert', async (req, res) => {
       user: user,
       host: process.env.PG_HOST,
       database: database,
-      password: password,
+      password: process.env.PG_PASS,
       port: process.env.PG_PORT,
       ssl: require
     });
@@ -72,7 +72,7 @@ app.post('/log', async (req, res) => {
   try {
     authenticate(req.headers.authorization);
     console.debug(`Incoming log: ${JSON.stringify(req.body)}`);
-    const { user, password, frame } = req.body;
+    const { user, frame } = req.body;
     const columns = Object.keys(frame);
     const values = Object.values(frame);
   
@@ -84,7 +84,7 @@ app.post('/log', async (req, res) => {
       user: user,
       host: process.env.PG_HOST,
       database: database,
-      password: password,
+      password: process.env.PG_PASS,
       port: process.env.PG_PORT,
       ssl: require
     });
@@ -115,7 +115,7 @@ app.get('/etcrain', async (req, res) => {
       user: user,
       host: process.env.PG_HOST,
       database: process.env.PG_DB,
-      password: password,
+      password: process.env.PG_PASS,
       port: process.env.PG_PORT,
       ssl: require
     });
