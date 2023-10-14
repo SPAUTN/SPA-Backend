@@ -6,6 +6,23 @@ const port = process.env.PORT ?? 8080; // Change to your desired port
 const path = require('path');
 const fs = require('fs');
 
+const ETC_QUERY = `
+     SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
+     FROM spa.wetweights AS w 
+     JOIN spa.dryweights AS d ON d.id = w.id+1
+     WHERE DATE(w.timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.wetweights)
+     LIMIT 1
+    `;
+
+const RAIN_QUERY = `
+  SELECT DATE(timestamp) as fecha,
+  SUM(pluviometer) as precipitacion_acumulada
+  FROM spa.weatherstation
+  WHERE DATE(timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.weatherstation)
+  GROUP BY DATE(timestamp)
+  LIMIT 1
+`;
+
 app.use(express.json());
 app.use(express.static("public"));
 
@@ -83,6 +100,35 @@ app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
 
+app.get('/etcrain', async (req, res) => {
+  const { user, password} = req.body;
+  try {
+    const pool = new Pool({
+      user: user,
+      host: process.env.PG_HOST,
+      database: process.env.PG_DB,
+      password: password,
+      port: process.env.PG_PORT,
+      ssl: require
+    });
+
+    const etc_result = await pool.query(ETC_QUERY);
+    const rain_result = await pool.query(RAIN_QUERY);
+
+    const finalResponse = {
+      ETc: etc_result.rows[0].etc,
+      cumulative_rain: rain_result.rows[0].precipitacion_acumulada
+    };
+
+  console.debug("Returning ETc and rain values: " + JSON.stringify(finalResponse)); 
+
+  res.json(finalResponse);
+
+  } catch (error) {
+    console.error('Error on query execution:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
 
 app.get('/',(req, res) => {
   const indexPath = path.join(__dirname, '../public', 'index.html');
