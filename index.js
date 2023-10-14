@@ -100,7 +100,7 @@ app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
 
-app.get('/consultar', async (req, res) => {
+app.get('/etcandrain', async (req, res) => {
   const { user, password} = req.body;
   try {
     const pool = new Pool({
