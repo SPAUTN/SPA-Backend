@@ -44,7 +44,6 @@ app.post('/insert', async (req, res) => {
     const database = process.env.PG_DB
     console.debug(`Trying to insert to: ${database}`);
 
-    // Create a new pool with the provided username, password, and database name
     const pool = new Pool({
       user: user,
       host: process.env.PG_HOST,
@@ -79,7 +78,6 @@ app.post('/log', async (req, res) => {
     const database = process.env.PG_DB
     console.debug(`Trying to insert to: ${database}`);
 
-    // Create a new pool with the provided username, password, and database name
     const pool = new Pool({
       user: user,
       host: process.env.PG_HOST,
@@ -109,7 +107,7 @@ app.listen(port, () => {
 });
 
 app.get('/etcrain', async (req, res) => {
-  const { user, password} = req.body;
+  const { user } = req.body;
   try {
     const pool = new Pool({
       user: user,
