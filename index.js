@@ -23,12 +23,19 @@ const RAIN_QUERY = `
   LIMIT 1
 `;
 
+function authenticate(basic_token) {
+  if(basic_token != process.env.BASIC_AUTH) {
+    throw Error("Unauthorized exception");
+  } 
+}
+
 app.use(express.json());
 app.use(express.static("public"));
 
 // Endpoint to receive data and insert into the specified table
 app.post('/insert', async (req, res) => {
   try {
+    authenticate(req.headers.authorization);
     console.debug(`Incoming body: ${JSON.stringify(req.body)}`);
     const { table, user, password, frame } = req.body;
     const columns = Object.keys(frame);
@@ -63,6 +70,7 @@ app.post('/insert', async (req, res) => {
 
 app.post('/log', async (req, res) => {
   try {
+    authenticate(req.headers.authorization);
     console.debug(`Incoming log: ${JSON.stringify(req.body)}`);
     const { user, password, frame } = req.body;
     const columns = Object.keys(frame);
@@ -131,9 +139,9 @@ app.get('/etcrain', async (req, res) => {
 });
 
 app.get('/',(req, res) => {
+  authenticate(req.headers.authorization);
   const indexPath = path.join(__dirname, '../public', 'index.html');
   console.log(indexPath);
-
   // Read the HTML file and send it as the response
   fs.readFile(indexPath, 'utf8', (err, data) => {
     if (err) {
