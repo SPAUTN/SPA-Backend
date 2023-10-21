@@ -101,13 +101,12 @@ app.listen(port, () => {
 });
 
 app.get('/etcrain', async (req, res) => {
-  const { user, password} = req.body;
   try {
     const pool = new Pool({
-      user: user,
+      user: process.env.PG_USER,
       host: process.env.PG_HOST,
       database: process.env.PG_DB,
-      password: password,
+      password: process.env.PG_PASS,
       port: process.env.PG_PORT,
       ssl: require
     });
