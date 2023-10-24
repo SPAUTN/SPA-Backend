@@ -10,8 +10,8 @@ const ETC_QUERY = `
      SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
      FROM spa.wetweights AS w 
      JOIN spa.dryweights AS d ON d.id = w.id+1
-     WHERE DATE(w.timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.wetweights)
-     LIMIT 1
+     ORDER BY w.timestamp DESC
+     LIMIT 1;
     `;
 
 const RAIN_QUERY = `
