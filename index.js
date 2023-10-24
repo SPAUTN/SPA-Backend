@@ -11,7 +11,7 @@ const ETC_QUERY = `
      FROM spa.wetweights AS w 
      JOIN spa.dryweights AS d ON d.id = w.id+1
      ORDER BY w.timestamp DESC
-     LIMIT 1;
+     LIMIT 1
     `;
 
 const RAIN_QUERY = `
