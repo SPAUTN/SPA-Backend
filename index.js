@@ -7,23 +7,24 @@ const path = require('path');
 const fs = require('fs');
 
 const ETC_QUERY = `
-     SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
-     FROM spa.wetweights AS w 
-     JOIN spa.dryweights AS d ON d.id = w.id+1
-     ORDER BY w.timestamp DESC
-     LIMIT 1
-    `;
+      SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
+      FROM spa.wetweights AS w 
+      JOIN spa.dryweights AS d ON d.id = w.id+1
+      ORDER BY w.timestamp DESC
+      LIMIT 1
+      `;
 
 const RAIN_QUERY = `
-  SELECT DATE(timestamp) as fecha,
-  SUM(pluviometer) as precipitacion_acumulada
-  FROM spa.weatherstation
-  WHERE DATE(timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.weatherstation)
-  GROUP BY DATE(timestamp)
-  LIMIT 1
-`;
+      SELECT DATE(timestamp) as fecha,
+      SUM(pluviometer) as precipitacion_acumulada
+      FROM spa.weatherstation
+      WHERE DATE(timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.weatherstation)
+      GROUP BY DATE(timestamp)
+      LIMIT 1
+    `;
 
 function authenticate(basic_token) {
+  console.log(basic_token);
   if(basic_token != process.env.BASIC_AUTH) {
     throw Error("Unauthorized exception");
   } 
