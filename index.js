@@ -23,9 +23,10 @@ const RAIN_QUERY = `
       LIMIT 1
     `;
 
-function authenticate(basic_token) {
-  console.log(basic_token);
-  if(basic_token != process.env.BASIC_AUTH) {
+function authenticate(basic_token, type="Basic") {
+  console.log("Received token: " + basic_token);
+  console.log("Current token: " + process.env.BASIC_AUTH);
+  if(basic_token !== process.env.BASIC_AUTH) {
     throw Error("Unauthorized exception");
   } 
 }
