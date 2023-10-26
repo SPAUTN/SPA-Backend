@@ -10,7 +10,7 @@ const ETC_QUERY = `
      SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
      FROM spa.wetweights AS w 
      JOIN spa.dryweights AS d ON d.id = w.id+1
-     WHERE DATE(w.timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.wetweights)
+     ORDER BY w.timestamp DESC
      LIMIT 1
     `;
 
@@ -107,10 +107,9 @@ app.listen(port, () => {
 });
 
 app.get('/etcrain', async (req, res) => {
-  const { user } = req.body;
   try {
     const pool = new Pool({
-      user: user,
+      user: process.env.PG_USER,
       host: process.env.PG_HOST,
       database: process.env.PG_DB,
       password: process.env.PG_PASS,
