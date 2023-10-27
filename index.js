@@ -6,6 +6,22 @@ const port = process.env.PORT ?? 8080; // Change to your desired port
 const path = require('path');
 const fs = require('fs');
 
+const ETC_QUERY = `
+      SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
+      FROM spa.wetweights AS w 
+      JOIN spa.dryweights AS d ON d.id = w.id+1
+      ORDER BY w.timestamp DESC
+      LIMIT 1
+      `;
+
+const RAIN_QUERY = `
+      SELECT DATE(timestamp) as fecha,
+      SUM(pluviometer) as precipitacion_acumulada
+      FROM spa.weatherstation
+      WHERE DATE(timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.weatherstation)
+      GROUP BY DATE(timestamp)
+      LIMIT 1
+    `;
 class UnauthorizedException extends Error {
   constructor(message) {
     super(message);
@@ -24,26 +40,7 @@ function errorHandler (error, res) {
   }
 }
 
-const ETC_QUERY = `
-      SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
-      FROM spa.wetweights AS w 
-      JOIN spa.dryweights AS d ON d.id = w.id+1
-      ORDER BY w.timestamp DESC
-      LIMIT 1
-      `;
-
-const RAIN_QUERY = `
-      SELECT DATE(timestamp) as fecha,
-      SUM(pluviometer) as precipitacion_acumulada
-      FROM spa.weatherstation
-      WHERE DATE(timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.weatherstation)
-      GROUP BY DATE(timestamp)
-      LIMIT 1
-    `;
-
 function authenticate(basic_token, type="Basic") {
-  console.log("Received token: " + basic_token);
-  console.log("Current token: " + process.env.BASIC_AUTH);
   if(basic_token !== process.env.BASIC_AUTH) {
     //throw Error("Unauthorized exception");
     throw UnauthorizedException("Unauthorized exception");
@@ -58,7 +55,7 @@ app.post('/insert', async (req, res) => {
   try {
     authenticate(req.headers.authorization);
     console.debug(`Incoming body: ${JSON.stringify(req.body)}`);
-    const { table, user, frame } = req.body;
+    const { table, frame } = req.body;
     const columns = Object.keys(frame);
     const values = Object.values(frame);
   
@@ -66,7 +63,7 @@ app.post('/insert', async (req, res) => {
     console.debug(`Trying to insert to: ${database}`);
 
     const pool = new Pool({
-      user: user,
+      user: process.env.PG_USER,
       host: process.env.PG_HOST,
       database: database,
       password: process.env.PG_PASS,
@@ -91,7 +88,7 @@ app.post('/log', async (req, res) => {
   try {
     authenticate(req.headers.authorization);
     console.debug(`Incoming log: ${JSON.stringify(req.body)}`);
-    const { user, frame } = req.body;
+    const { frame } = req.body;
     const columns = Object.keys(frame);
     const values = Object.values(frame);
   
@@ -99,7 +96,7 @@ app.post('/log', async (req, res) => {
     console.debug(`Trying to insert to: ${database}`);
 
     const pool = new Pool({
-      user: user,
+      user: process.env.PG_USER,
       host: process.env.PG_HOST,
       database: database,
       password: process.env.PG_PASS,
@@ -126,7 +123,7 @@ app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
 
-app.get('/etcrain', async (req, res) => {
+app.get('/etcrain', async (res) => {
   try {
     const pool = new Pool({
       user: process.env.PG_USER,
