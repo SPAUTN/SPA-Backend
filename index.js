@@ -6,6 +6,24 @@ const port = process.env.PORT ?? 8080; // Change to your desired port
 const path = require('path');
 const fs = require('fs');
 
+class UnauthorizedException extends Error {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+    this.code = 401;
+  }
+}
+
+function errorHandler (error, res) {
+  if(error instanceof UnauthorizedException) {
+    console.error(error.message);
+    res.status(error.code).json({error: error.message})
+  } else {
+    console.error('Error inserting data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
 const ETC_QUERY = `
       SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
       FROM spa.wetweights AS w 
@@ -27,7 +45,8 @@ function authenticate(basic_token, type="Basic") {
   console.log("Received token: " + basic_token);
   console.log("Current token: " + process.env.BASIC_AUTH);
   if(basic_token !== process.env.BASIC_AUTH) {
-    throw Error("Unauthorized exception");
+    //throw Error("Unauthorized exception");
+    throw UnauthorizedException("Unauthorized exception");
   } 
 }
 
@@ -64,8 +83,7 @@ app.post('/insert', async (req, res) => {
     res.status(201).json({ message: 'Data inserted successfully' });
     console.debug(`Data inserted succesffuly: "${Object.values(frame)}" in "${Object.keys(frame)}" from "${table}"`);
   } catch (error) {
-    console.error('Error inserting data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    errorHandler (error, res)
   }
 });
 
@@ -98,8 +116,8 @@ app.post('/log', async (req, res) => {
     res.status(201).json({ message: 'Log inserted successfully' });
     console.debug("Log inserted succesffuly.");
   } catch (error) {
-    console.error('Error inserting log:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    error.message = 'Error inserting log'; 
+    errorHandler (error, res)
   }
 });
 
@@ -132,8 +150,8 @@ app.get('/etcrain', async (req, res) => {
   res.json(finalResponse);
 
   } catch (error) {
-    console.error('Error on query execution:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    error.message = 'Error on query execution'; 
+    errorHandler (error, res)
   }
 });
 
@@ -148,7 +166,6 @@ app.get('/',(req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
       return;
     }
-
     res.send(data);
   });
 });
