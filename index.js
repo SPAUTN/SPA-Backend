@@ -65,7 +65,7 @@ app.post('/insert', async (req, res) => {
     const pool = new Pool({
       user: process.env.PG_USER,
       host: process.env.PG_HOST,
-      database: database,
+      database: process.env.PG_DB,
       password: process.env.PG_PASS,
       port: process.env.PG_PORT,
       ssl: require
@@ -98,7 +98,7 @@ app.post('/log', async (req, res) => {
     const pool = new Pool({
       user: process.env.PG_USER,
       host: process.env.PG_HOST,
-      database: database,
+      database: process.env.PG_DB,
       password: process.env.PG_PASS,
       port: process.env.PG_PORT,
       ssl: require
