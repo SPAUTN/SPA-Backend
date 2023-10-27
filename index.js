@@ -125,6 +125,7 @@ app.listen(port, () => {
 });
 
 app.get('/etcrain', async (req, res) => {
+  authenticate(req.headers.authorization);
   try {
     const pool = new Pool({
       user: process.env.PG_USER,
