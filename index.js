@@ -32,25 +32,26 @@ class UnauthorizedException extends Error {
 
 function errorHandler (error, res) {
   if(error instanceof UnauthorizedException) {
+    error.message += " at authentication";
     console.error(error.message);
     res.status(error.code).json({error: error.message})
   } else {
-    console.error('Error inserting data:', error);
+    console.error(error.message);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 }
 
-function authenticate(basic_token, type="Basic") {
-  if(basic_token !== process.env.BASIC_AUTH) {
-    //throw Error("Unauthorized exception");
-    throw UnauthorizedException("Unauthorized exception");
-  } 
+function authenticate(basic_token) {
+  if(basic_token != process.env.BASIC_AUTH) {
+    throw new UnauthorizedException("Unauthorized exception");
+  }
+  console.log("Login succesfully!");   
 }
 
 app.use(express.json());
 app.use(express.static("public"));
 
-// Endpoint to receive data and insert into the specified table
+// Context to receive data and insert into the specified table
 app.post('/insert', async (req, res) => {
   try {
     authenticate(req.headers.authorization);
@@ -80,7 +81,8 @@ app.post('/insert', async (req, res) => {
     res.status(201).json({ message: 'Data inserted successfully' });
     console.debug(`Data inserted succesffuly: "${Object.values(frame)}" in "${Object.keys(frame)}" from "${table}"`);
   } catch (error) {
-    errorHandler (error, res)
+    error.message = "Error on inserting data";
+    errorHandler(error, res);
   }
 });
 
@@ -92,8 +94,7 @@ app.post('/log', async (req, res) => {
     const columns = Object.keys(frame);
     const values = Object.values(frame);
   
-    const database = process.env.PG_DB
-    console.debug(`Trying to insert to: ${database}`);
+    console.debug(`Trying to insert to: ${process.env.PG_DB}`);
 
     const pool = new Pool({
       user: process.env.PG_USER,
@@ -114,7 +115,7 @@ app.post('/log', async (req, res) => {
     console.debug("Log inserted succesffuly.");
   } catch (error) {
     error.message = 'Error inserting log'; 
-    errorHandler (error, res)
+    errorHandler(error, res);
   }
 });
 
@@ -123,7 +124,7 @@ app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
 
-app.get('/etcrain', async (res) => {
+app.get('/etcrain', async (req, res) => {
   try {
     const pool = new Pool({
       user: process.env.PG_USER,
@@ -148,7 +149,7 @@ app.get('/etcrain', async (res) => {
 
   } catch (error) {
     error.message = 'Error on query execution'; 
-    errorHandler (error, res)
+    errorHandler(error, res);
   }
 });
 
