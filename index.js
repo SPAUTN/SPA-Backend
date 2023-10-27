@@ -139,7 +139,7 @@ app.get('/etcrain', async (req, res) => {
     const rain_result = await pool.query(RAIN_QUERY);
 
     const finalResponse = {
-      Wetweight: wetweight_result.rows[0].wetweight,
+      wetweight: wetweight_result.rows[0].wetweight,
       cumulative_rain: rain_result.rows[0].precipitacion_acumulada
     };
 
