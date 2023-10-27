@@ -6,13 +6,12 @@ const port = process.env.PORT ?? 8080; // Change to your desired port
 const path = require('path');
 const fs = require('fs');
 
-const ETC_QUERY = `
-     SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
-     FROM spa.wetweights AS w 
-     JOIN spa.dryweights AS d ON d.id = w.id+1
-     ORDER BY w.timestamp DESC
-     LIMIT 1
-    `;
+const WetWeight_QUERY = `
+  SELECT wetweight 
+  FROM spa.wetweights 
+  ORDER BY id DESC 
+  LIMIT 1
+`;
 
 const RAIN_QUERY = `
   SELECT DATE(timestamp) as fecha,
@@ -111,15 +110,15 @@ app.get('/etcrain', async (req, res) => {
       ssl: require
     });
 
-    const etc_result = await pool.query(ETC_QUERY);
+    const Wetweight_result = await pool.query(WetWeight_QUERY);
     const rain_result = await pool.query(RAIN_QUERY);
 
     const finalResponse = {
-      ETc: etc_result.rows[0].etc,
+      Wetweight: Wetweight_result.rows[0].wetweight,
       cumulative_rain: rain_result.rows[0].precipitacion_acumulada
     };
 
-  console.debug("Returning ETc and rain values: " + JSON.stringify(finalResponse)); 
+  console.debug("Returning wetweight and rain values: " + JSON.stringify(finalResponse)); 
 
   res.json(finalResponse);
 
