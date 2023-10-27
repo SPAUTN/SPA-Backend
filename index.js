@@ -7,42 +7,67 @@ const path = require('path');
 const fs = require('fs');
 
 const ETC_QUERY = `
-     SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
-     FROM spa.wetweights AS w 
-     JOIN spa.dryweights AS d ON d.id = w.id+1
-     ORDER BY w.timestamp DESC
-     LIMIT 1
-    `;
+      SELECT w.timestamp as fecha, (w.wetweight - d.dryweight)/1000 AS ETc 
+      FROM spa.wetweights AS w 
+      JOIN spa.dryweights AS d ON d.id = w.id+1
+      ORDER BY w.timestamp DESC
+      LIMIT 1
+      `;
 
 const RAIN_QUERY = `
-  SELECT DATE(timestamp) as fecha,
-  SUM(pluviometer) as precipitacion_acumulada
-  FROM spa.weatherstation
-  WHERE DATE(timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.weatherstation)
-  GROUP BY DATE(timestamp)
-  LIMIT 1
-`;
+      SELECT DATE(timestamp) as fecha,
+      SUM(pluviometer) as precipitacion_acumulada
+      FROM spa.weatherstation
+      WHERE DATE(timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.weatherstation)
+      GROUP BY DATE(timestamp)
+      LIMIT 1
+    `;
+class UnauthorizedException extends Error {
+  constructor(message) {
+    super(message);
+    this.name = this.constructor.name;
+    this.code = 401;
+  }
+}
+
+function errorHandler (error, res) {
+  if(error instanceof UnauthorizedException) {
+    error.message += " at authentication";
+    console.error(error.message);
+    res.status(error.code).json({error: error.message})
+  } else {
+    console.error(error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+function authenticate(basic_token) {
+  if(basic_token != process.env.BASIC_AUTH) {
+    throw new UnauthorizedException("Unauthorized exception");
+  }
+  console.log("Login succesfully!");   
+}
 
 app.use(express.json());
 app.use(express.static("public"));
 
-// Endpoint to receive data and insert into the specified table
+// Context to receive data and insert into the specified table
 app.post('/insert', async (req, res) => {
   try {
+    authenticate(req.headers.authorization);
     console.debug(`Incoming body: ${JSON.stringify(req.body)}`);
-    const { table, user, password, frame } = req.body;
+    const { table, frame } = req.body;
     const columns = Object.keys(frame);
     const values = Object.values(frame);
   
     const database = process.env.PG_DB
     console.debug(`Trying to insert to: ${database}`);
 
-    // Create a new pool with the provided username, password, and database name
     const pool = new Pool({
-      user: user,
+      user: process.env.PG_USER,
       host: process.env.PG_HOST,
-      database: database,
-      password: password,
+      database: process.env.PG_DB,
+      password: process.env.PG_PASS,
       port: process.env.PG_PORT,
       ssl: require
     });
@@ -56,27 +81,26 @@ app.post('/insert', async (req, res) => {
     res.status(201).json({ message: 'Data inserted successfully' });
     console.debug(`Data inserted succesffuly: "${Object.values(frame)}" in "${Object.keys(frame)}" from "${table}"`);
   } catch (error) {
-    console.error('Error inserting data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    error.message = "Error on inserting data";
+    errorHandler(error, res);
   }
 });
 
 app.post('/log', async (req, res) => {
   try {
+    authenticate(req.headers.authorization);
     console.debug(`Incoming log: ${JSON.stringify(req.body)}`);
-    const { user, password, frame } = req.body;
+    const { frame } = req.body;
     const columns = Object.keys(frame);
     const values = Object.values(frame);
   
-    const database = process.env.PG_DB
-    console.debug(`Trying to insert to: ${database}`);
+    console.debug(`Trying to insert to: ${process.env.PG_DB}`);
 
-    // Create a new pool with the provided username, password, and database name
     const pool = new Pool({
-      user: user,
+      user: process.env.PG_USER,
       host: process.env.PG_HOST,
-      database: database,
-      password: password,
+      database: process.env.PG_DB,
+      password: process.env.PG_PASS,
       port: process.env.PG_PORT,
       ssl: require
     });
@@ -90,8 +114,8 @@ app.post('/log', async (req, res) => {
     res.status(201).json({ message: 'Log inserted successfully' });
     console.debug("Log inserted succesffuly.");
   } catch (error) {
-    console.error('Error inserting log:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    error.message = 'Error inserting log'; 
+    errorHandler(error, res);
   }
 });
 
@@ -101,6 +125,7 @@ app.listen(port, () => {
 });
 
 app.get('/etcrain', async (req, res) => {
+  authenticate(req.headers.authorization);
   try {
     const pool = new Pool({
       user: process.env.PG_USER,
@@ -124,15 +149,15 @@ app.get('/etcrain', async (req, res) => {
   res.json(finalResponse);
 
   } catch (error) {
-    console.error('Error on query execution:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    error.message = 'Error on query execution'; 
+    errorHandler(error, res);
   }
 });
 
 app.get('/',(req, res) => {
+  authenticate(req.headers.authorization);
   const indexPath = path.join(__dirname, '../public', 'index.html');
   console.log(indexPath);
-
   // Read the HTML file and send it as the response
   fs.readFile(indexPath, 'utf8', (err, data) => {
     if (err) {
@@ -140,7 +165,6 @@ app.get('/',(req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
       return;
     }
-
     res.send(data);
   });
 });
