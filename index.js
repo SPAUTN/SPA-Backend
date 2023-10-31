@@ -47,13 +47,20 @@ function authenticate(basic_token) {
   console.log("Login succesfully!");   
 }
 
+function requestInformation(req) {
+  let info = "Body: " + JSON.stringify(req.body) + "\n" +
+             "Headers: " + JSON.stringify(req.headers) + "\n" +
+             "Method: " + JSON.stringify(req.method);
+  console.log("Request information:\n" + info);
+}
+
 app.use(express.json());
 app.use(express.static("public"));
 
 // Context to receive data and insert into the specified table
 app.post('/insert', async (req, res) => {
   try {
-    console.log(`Incoming req: ${JSON.stringify(req)}`);
+    requestInformation(req)
     authenticate(req.headers.authorization);
     console.debug(`Incoming body: ${JSON.stringify(req.body)}`);
     const { table, frame } = req.body;
@@ -88,7 +95,7 @@ app.post('/insert', async (req, res) => {
 
 app.post('/log', async (req, res) => {
   try {
-    console.log(`Incoming req: ${JSON.stringify(req)}`);
+    requestInformation(req)
     authenticate(req.headers.authorization);
     console.debug(`Incoming log: ${JSON.stringify(req.body)}`);
     const { frame } = req.body;
@@ -127,7 +134,7 @@ app.listen(port, () => {
 
 app.get('/etcrain', async (req, res) => {
   try {
-    console.log(`Incoming req: ${JSON.stringify(req)}`);
+    requestInformation(req)
     authenticate(req.headers.authorization);
     const pool = new Pool({
       user: process.env.PG_USER,
@@ -157,7 +164,7 @@ app.get('/etcrain', async (req, res) => {
 });
 
 app.get('/',(req, res) => {
-  console.log(`Incoming req: ${JSON.stringify(req)}`);
+  requestInformation(req)
   authenticate(req.headers.authorization);
   const indexPath = path.join(__dirname, '../public', 'index.html');
   console.log(indexPath);
