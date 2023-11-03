@@ -164,6 +164,6 @@ app.get('/',(req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
       return;
     }
-    res.send(data);
+    res.send(data).status(200);
   });
 });
