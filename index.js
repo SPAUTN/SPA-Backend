@@ -67,7 +67,7 @@ app.post('/insert', async (req, res) => {
       host: process.env.PG_HOST,
       database: process.env.PG_DB,
       password: process.env.PG_PASS,
-      port: process.env.PG_PORT,
+      port: process.env.PG_PORT
   //  ssl: require
     });
 
@@ -100,7 +100,7 @@ app.post('/log', async (req, res) => {
       host: process.env.PG_HOST,
       database: process.env.PG_DB,
       password: process.env.PG_PASS,
-      port: process.env.PG_PORT,
+      port: process.env.PG_PORT
  //   ssl: require
     });
 
@@ -131,7 +131,7 @@ app.get('/etcrain', async (req, res) => {
       host: process.env.PG_HOST,
       database: process.env.PG_DB,
       password: process.env.PG_PASS,
-      port: process.env.PG_PORT,
+      port: process.env.PG_PORT
 //    ssl: require
     });
 
