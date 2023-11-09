@@ -68,7 +68,7 @@ app.post('/insert', async (req, res) => {
       database: process.env.PG_DB,
       password: process.env.PG_PASS,
       port: process.env.PG_PORT,
-      ssl: require
+  //  ssl: require
     });
 
     // Construct the SQL query dynamically based on the columns and values
@@ -101,7 +101,7 @@ app.post('/log', async (req, res) => {
       database: process.env.PG_DB,
       password: process.env.PG_PASS,
       port: process.env.PG_PORT,
-      ssl: require
+ //   ssl: require
     });
 
     // Construct the SQL query dynamically based on the columns and values
@@ -132,7 +132,7 @@ app.get('/etcrain', async (req, res) => {
       database: process.env.PG_DB,
       password: process.env.PG_PASS,
       port: process.env.PG_PORT,
-      ssl: require
+//    ssl: require
     });
 
     const wetweight_result = await pool.query(WETWEIGHT_QUERY);
