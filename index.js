@@ -47,6 +47,37 @@ function authenticate(basic_token) {
   console.log("Login succesfully!");   
 }
 
+/*
+Create a function to receive the left value and return the right value
+  pl -> pluviometer     
+  ws -> windspeed
+  wd -> winddirection       
+  l ->  leafmoisture
+  h ->  humidity
+  r ->  raidiation
+  t ->  temperature
+  pr -> pressure
+  wh -> weight
+*/
+
+const columnName = {
+  pl: "pluviometer",
+  ws: "windspeed",
+  wd: "winddirection",
+  l: "leafmoisture",
+  h: "humidity",
+  r: "radiation",
+  t: "temperature",
+  pr: "pressure",
+  wh: "weight",
+  etc: "etc",
+  wwh: "wetweight",
+  hc: "httpcode",
+  msg: "message",
+  lv: "level",
+  src: "source"
+}
+
 app.use(express.json());
 app.use(express.static("public"));
 
@@ -55,9 +86,24 @@ app.post('/insert', async (req, res) => {
   try {
     authenticate(req.headers.authorization);
     console.debug(`Incoming body: ${JSON.stringify(req.body)}`);
-    const { table, frame } = req.body;
-    const columns = Object.keys(frame);
-    const values = Object.values(frame);
+    const { tb, fr } = req.body;
+    const frame = fr.substring(tb.indexOf(">") + 1, fr.indexOf("<"));
+    var [command, finalFrame] = frame.split("+");
+    const sensors = finalFrame.split(";");
+    const columns = [];
+    const values = [];
+
+    for (const sensor of sensors) {
+      const [name, value] = sensor.split(":");
+      console.log(name + " -> " + value);
+      columns.push(columnName[name]);
+      values.push(value);
+    }
+
+    console.log("Comando: " + command);
+    console.log("Tabla: " + tb);
+    console.log("Columnas: " + columns); 
+    console.log("Valores: " + values); 
   
     const database = process.env.PG_DB
     console.debug(`Trying to insert to: ${database}`);
@@ -71,15 +117,15 @@ app.post('/insert', async (req, res) => {
       ssl: require
     });
 
-    // Construct the SQL query dynamically based on the columns and values
-    const query = `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${values.map((_, index) => `$${index + 1}`).join(', ')})`;
-    
-    // Execute the query with the values
+    const query = `INSERT INTO ${tb} (${columns.join(', ')}) VALUES (${values.map((_, index) => `$${index + 1}`).join(', ')})`;
+    console.log("Query: " + query);
+    console.log("Values: " + values);
     await pool.query(query, values);
 
     res.status(201).json({ message: 'Data inserted successfully' });
-    console.debug(`Data inserted succesffuly: "${Object.values(frame)}" in "${Object.keys(frame)}" from "${table}"`);
+    console.debug(`Data inserted succesffuly: "${values}" in "${columns}" from "${tb}"`);
   } catch (error) {
+    console.error(error);
     error.message = "Error on inserting data";
     errorHandler(error, res);
   }
@@ -89,9 +135,18 @@ app.post('/log', async (req, res) => {
   try {
     authenticate(req.headers.authorization);
     console.debug(`Incoming log: ${JSON.stringify(req.body)}`);
-    const { frame } = req.body;
-    const columns = Object.keys(frame);
-    const values = Object.values(frame);
+    const { fr } = req.body;
+    const frame = fr.substring(fr.indexOf(">") + 1, fr.indexOf("<"));
+    const fields = frame.split(";");
+    const columns = [];
+    const values = []
+
+    fields.map((field) => {
+      const [name, value] = field.split(":");
+      columns.push(columnName[name]);
+      values.push(value);
+      console.log(columnName[name] + " -> " + value);
+    });
   
     console.debug(`Trying to insert to: ${process.env.PG_DB}`);
 
@@ -113,6 +168,7 @@ app.post('/log', async (req, res) => {
     res.status(201).json({ message: 'Log inserted successfully' });
     console.debug("Log inserted succesffuly.");
   } catch (error) {
+    console.error(error);
     error.message = 'Error inserting log'; 
     errorHandler(error, res);
   }
