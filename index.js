@@ -205,7 +205,6 @@ app.get('/',(req, res) => {
   authenticate(req.headers.authorization);
   const indexPath = path.join(__dirname, '../public', 'index.html');
   console.log(indexPath);
-  // Read the HTML file and send it as the response
   fs.readFile(indexPath, 'utf8', (err, data) => {
     if (err) {
       console.error('Error reading HTML file:', err);
