@@ -136,16 +136,20 @@ app.post('/log', async (req, res) => {
     authenticate(req.headers.authorization);
     console.debug(`Incoming log: ${JSON.stringify(req.body)}`);
     const { fr } = req.body;
-    const frame = fr.substring(fr.indexOf(">") + 1, fr.indexOf("<"));
-    const fields = frame.split(";");
-    const columns = [];
-    const values = []
+    const frame = fr.substring(fr.indexOf(">") + 1, fr.lastIndexOf("<")+1);
+    console.log("Frame: " + frame);
 
-    fields.map((field) => {
-      const [name, value] = field.split(":");
-      columns.push(columnName[name]);
-      values.push(value);
-      console.log(columnName[name] + " -> " + value);
+    const wantedFields = ['hc', 'msg', 'lv', 'src'];
+
+    const fields = fr.split(";").map(field => field.split(":"));
+    const columns = [];
+    const values = [];
+
+    fields.forEach(([name, value]) => {
+      if (wantedFields.includes(name)) {
+        columns.push(columnName[name]);
+        values.push(value);
+      }
     });
   
     console.debug(`Trying to insert to: ${process.env.PG_DB}`);
