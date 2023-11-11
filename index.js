@@ -47,19 +47,6 @@ function authenticate(basic_token) {
   console.log("Login succesfully!");   
 }
 
-/*
-Create a function to receive the left value and return the right value
-  pl -> pluviometer     
-  ws -> windspeed
-  wd -> winddirection       
-  l ->  leafmoisture
-  h ->  humidity
-  r ->  raidiation
-  t ->  temperature
-  pr -> pressure
-  wh -> weight
-*/
-
 const columnName = {
   pl: "pluviometer",
   ws: "windspeed",
