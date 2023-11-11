@@ -131,10 +131,14 @@ app.post('/log', async (req, res) => {
     const fields = fr.split(";").map(field => field.split(":"));
     const columns = [];
     const values = [];
+    const frameFromMessage = ': ' + frame.substring(frame.indexOf("'"), frame.lastIndexOf("'"));
 
     fields.forEach(([name, value]) => {
       if (wantedFields.includes(name)) {
         columns.push(columnName[name]);
+        if(name === 'msg') {
+          if(frameFromMessage != null) value += frameFromMessage; 
+        }
         values.push(value);
       }
     });
