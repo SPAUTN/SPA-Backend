@@ -80,12 +80,12 @@ app.post('/insert', async (req, res) => {
     const columns = [];
     const values = [];
 
-    for (const sensor of sensors) {
+    sensors.forEach((sensor) => {
       const [name, value] = sensor.split(":");
       console.log(name + " -> " + value);
       columns.push(columnName[name]);
       values.push(value);
-    }
+    }); 
 
     console.log("Comando: " + command);
     console.log("Tabla: " + tb);
