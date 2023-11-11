@@ -124,25 +124,22 @@ app.post('/log', async (req, res) => {
     console.debug(`Incoming log: ${JSON.stringify(req.body)}`);
     const { fr } = req.body;
     const frame = fr.substring(fr.indexOf(">") + 1, fr.lastIndexOf("<")+1);
-    console.log("Frame: " + frame);
-
-    const wantedFields = ['hc', 'msg', 'lv', 'src'];
-
-    const fields = fr.split(";").map(field => field.split(":"));
+    console.log("Incoming frame: " + frame);
+    const fields = ['hc', 'msg', 'lv', 'src'];
     const columns = [];
     const values = [];
-    const frameFromMessage = ': ' + frame.substring(frame.indexOf("'"), frame.lastIndexOf("'"));
 
-    fields.forEach(([name, value]) => {
-      if (wantedFields.includes(name)) {
-        columns.push(columnName[name]);
-        if(name === 'msg') {
-          if(frameFromMessage != null) value += frameFromMessage; 
-        }
+    fields.forEach((column, index) => {
+      if(index === fields.length - 1) {
+        const value = frame.substring(frame.indexOf(column) + column.length + 1, frame.lastIndexOf("<"));
+        values.push(value);
+      } else {
+        const value = frame.substring(frame.indexOf(column) + column.length + 1, frame.indexOf(fields[index+1]) - 1);
         values.push(value);
       }
-    });
-  
+      columns.push(columnName[column]);
+    })
+
     console.debug(`Trying to insert to: ${process.env.PG_DB}`);
 
     const pool = new Pool({
