@@ -41,6 +41,8 @@ function errorHandler (error, res) {
 }
 
 function authenticate(basic_token) {
+  console.log("Basic token: " + basic_token);
+  console.log("Basic auth: " + process.env.BASIC_AUTH);
   if(basic_token != process.env.BASIC_AUTH) {
     throw new UnauthorizedException("Unauthorized exception");
   }
