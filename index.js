@@ -101,9 +101,7 @@ app.post('/insert', async (req, res) => {
       database: process.env.PG_DB,
       password: process.env.PG_PASS,
       port: process.env.PG_PORT,
-      ssl: {
-        rejectUnauthorized: false
-      }
+      ssl: require
     });
 
     const query = `INSERT INTO ${tb} (${columns.join(', ')}) VALUES (${values.map((_, index) => `$${index + 1}`).join(', ')})`;
@@ -150,10 +148,9 @@ app.post('/log', async (req, res) => {
       database: process.env.PG_DB,
       password: process.env.PG_PASS,
       port: process.env.PG_PORT,
-      ssl: {
-        rejectUnauthorized: false
-      }
+      ssl: require
     });
+
     // Construct the SQL query dynamically based on the columns and values
     const query = `INSERT INTO spa.logs (${columns.join(', ')}) VALUES (${values.map((_, index) => `$${index + 1}`).join(', ')})`;
     
@@ -183,9 +180,7 @@ app.get('/etcrain', async (req, res) => {
       database: process.env.PG_DB,
       password: process.env.PG_PASS,
       port: process.env.PG_PORT,
-      ssl: {
-        rejectUnauthorized: false
-      }
+      ssl: require
     });
 
     const wetweight_result = await pool.query(WETWEIGHT_QUERY);
