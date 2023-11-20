@@ -14,13 +14,15 @@ const WETWEIGHT_QUERY = `
     `;
 
 const RAIN_QUERY = `
-      SELECT DATE(timestamp) as fecha,
-      SUM(pluviometer) as precipitacion_acumulada
+      SELECT sum(pluviometer) AS cumulative_rain
       FROM spa.weatherstation
-      WHERE DATE(timestamp) = (SELECT MAX(DATE(timestamp)) FROM spa.weatherstation)
-      GROUP BY DATE(timestamp)
-      LIMIT 1
+      WHERE DATE_TRUNC('minute',timestamp) >= (
+      SELECT DATE_TRUNC('minute',timestamp) AS truncated_date
+      FROM spa.wetweights
+      ORDER BY timestamp DESC
+      LIMIT 1);
     `;
+
 class UnauthorizedException extends Error {
   constructor(message) {
     super(message);
@@ -188,7 +190,7 @@ app.get('/etcrain', async (req, res) => {
 
     const finalResponse = {
       wetweight: wetweight_result.rows[0].wetweight,
-      cumulative_rain: rain_result.rows[0].precipitacion_acumulada
+      cumulative_rain: rain_result.rows[0].cumulative_rain
     };
 
   console.debug("Returning wetweight and rain values: " + JSON.stringify(finalResponse)); 
