@@ -173,6 +173,34 @@ app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
 
+app.get('/etc', async (req, res) => {
+  try {
+    authenticate(req.headers.authorization);
+    const pool = new Pool({
+      user: process.env.PG_USER,
+      host: process.env.PG_HOST,
+      database: process.env.PG_DB,
+      password: process.env.PG_PASS,
+      port: process.env.PG_PORT,
+      ssl: require
+    });
+
+    const wetweight_result = await pool.query(WETWEIGHT_QUERY);
+
+    const finalResponse = {
+      wetweight: wetweight_result.rows[0].wetweight
+    };
+
+  console.debug("Returning wetweight value: " + JSON.stringify(finalResponse)); 
+
+  res.json(finalResponse);
+
+  } catch (error) {
+    error.message = 'Error on query execution'; 
+    errorHandler(error, res);
+  }
+});
+
 app.get('/etcrain', async (req, res) => {
   try {
     authenticate(req.headers.authorization);
