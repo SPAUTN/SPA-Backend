@@ -13,16 +13,6 @@ const WETWEIGHT_QUERY = `
       LIMIT 1
     `;
 
-const RAIN_QUERY = `
-      SELECT sum(pluviometer) AS cumulative_rain
-      FROM spa.weatherstation
-      WHERE DATE_TRUNC('minute',timestamp) >= (
-      SELECT DATE_TRUNC('minute',timestamp) AS truncated_date
-      FROM spa.wetweights
-      ORDER BY timestamp DESC
-      LIMIT 1);
-    `;
-
 class UnauthorizedException extends Error {
   constructor(message) {
     super(message);
@@ -192,36 +182,6 @@ app.get('/etc', async (req, res) => {
     };
 
   console.debug("Returning wetweight value: " + JSON.stringify(finalResponse)); 
-
-  res.json(finalResponse);
-
-  } catch (error) {
-    error.message = 'Error on query execution'; 
-    errorHandler(error, res);
-  }
-});
-
-app.get('/etcrain', async (req, res) => {
-  try {
-    authenticate(req.headers.authorization);
-    const pool = new Pool({
-      user: process.env.PG_USER,
-      host: process.env.PG_HOST,
-      database: process.env.PG_DB,
-      password: process.env.PG_PASS,
-      port: process.env.PG_PORT,
-      ssl: require
-    });
-
-    const wetweight_result = await pool.query(WETWEIGHT_QUERY);
-    const rain_result = await pool.query(RAIN_QUERY);
-
-    const finalResponse = {
-      wetweight: wetweight_result.rows[0].wetweight,
-      cumulative_rain: rain_result.rows[0].cumulative_rain
-    };
-
-  console.debug("Returning wetweight and rain values: " + JSON.stringify(finalResponse)); 
 
   res.json(finalResponse);
 
