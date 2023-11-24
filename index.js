@@ -13,16 +13,6 @@ const WETWEIGHT_QUERY = `
       LIMIT 1
     `;
 
-const RAIN_QUERY = `
-      SELECT sum(pluviometer) AS cumulative_rain
-      FROM spa.weatherstation
-      WHERE DATE_TRUNC('minute',timestamp) >= (
-      SELECT DATE_TRUNC('minute',timestamp) AS truncated_date
-      FROM spa.wetweights
-      ORDER BY timestamp DESC
-      LIMIT 1);
-    `;
-
 class UnauthorizedException extends Error {
   constructor(message) {
     super(message);
@@ -173,7 +163,7 @@ app.listen(port, () => {
   console.log(`Server is listening on port ${port}`);
 });
 
-app.get('/etcrain', async (req, res) => {
+app.get('/etc', async (req, res) => {
   try {
     authenticate(req.headers.authorization);
     const pool = new Pool({
@@ -186,14 +176,12 @@ app.get('/etcrain', async (req, res) => {
     });
 
     const wetweight_result = await pool.query(WETWEIGHT_QUERY);
-    const rain_result = await pool.query(RAIN_QUERY);
 
     const finalResponse = {
-      wetweight: wetweight_result.rows[0].wetweight,
-      cumulative_rain: rain_result.rows[0].cumulative_rain
+      wetweight: wetweight_result.rows[0].wetweight
     };
 
-  console.debug("Returning wetweight and rain values: " + JSON.stringify(finalResponse)); 
+  console.debug("Returning wetweight value: " + JSON.stringify(finalResponse)); 
 
   res.json(finalResponse);
 
