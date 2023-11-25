@@ -204,3 +204,25 @@ app.get('/',(req, res) => {
     res.send(data).status(200);
   });
 });
+
+app.get('/ping', async (req, res) => {
+  try {
+    authenticate(req.headers.authorization);
+    const pool = new Pool({
+      user: process.env.PG_USER,
+      host: process.env.PG_HOST,
+      database: process.env.PG_DB,
+      password: process.env.PG_PASS,
+      port: process.env.PG_PORT,
+      ssl: require
+    });
+
+    console.debug("Incoming ping alarm.");
+
+    res.status(200).json({ message: 'Ping alarm received' });
+
+  } catch (error) {
+    error.message = 'Error on query execution'; 
+    errorHandler(error, res);
+  }
+});
